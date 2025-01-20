@@ -1,0 +1,14 @@
+{
+    "name": "DivineSkies.ModuleCore",
+    "rootNamespace": "DivineSkies.ModuleCore",
+    "references": [],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
