@@ -1,7 +1,9 @@
 {
     "name": "DivineSkies.ModuleCore",
-    "rootNamespace": "DivineSkies.ModuleCore",
-    "references": [],
+    "rootNamespace": "DivineSkies.Modules",
+    "references": [
+        "GUID:326d67a062d8dd047a58bf1a70526d72"
+    ],
     "includePlatforms": [],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
