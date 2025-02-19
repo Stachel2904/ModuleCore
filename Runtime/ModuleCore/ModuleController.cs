@@ -18,7 +18,7 @@ namespace DivineSkies.Modules
 
         private static IEnumerable<ModuleBase> LoadedModules => _self.constantModules.Concat(_self._sceneModules);
 
-        private static IModuleHolder _holder;
+        private static ModuleHolderBase _holder;
 
         private static ModuleController _self;
 
@@ -29,10 +29,10 @@ namespace DivineSkies.Modules
 
         private Image _blendMask;
 
-        public static void Create(IModuleHolder holder)
+        internal static ModuleController Create(ModuleHolderBase holder)
         {
             if (_self != null)
-                return;
+                return _self;
 
             _self = new GameObject("Modules").AddComponent<ModuleController>();
             DontDestroyOnLoad(_self.gameObject);
@@ -42,10 +42,20 @@ namespace DivineSkies.Modules
             ConstantUiParent = overlayRendering.transform.GetComponentInChildren<Canvas>().transform;
             _self._blendMask = ConstantUiParent.Find("BlendMask").GetComponent<Image>();
 
-            _self.AddConstantModules();
+            _holder = holder;
             SceneManager.sceneLoaded += _self.AfterSceneLoad;
 
-            _holder = holder;
+            return _self;
+        }
+
+        internal void InitializeConstantModules(Action callback)
+        {
+            foreach (var type in _holder.GetConstantModuleTypes())
+            {
+                AddModule(type, true);
+            }
+
+            StartCoroutine(InitializeAllUninitialized(callback));
         }
 
         public static void Restart()
@@ -74,15 +84,6 @@ namespace DivineSkies.Modules
         public static TLoadData GetLoadData<TLoadData>() where TLoadData : SceneLoadData => _self.sceneLoadData.OfType<TLoadData>().FirstOrDefault();
 
         #region module managing
-        private void AddConstantModules()
-        {
-            foreach (var type in _holder.GetConstantModuleTypes())
-            {
-                AddModule(type, true);
-            }
-
-            StartCoroutine(InitializeAllUninitialized(null));
-        }
 
         public static void AddSubModule<TModule>() where TModule : ModuleBase
         {

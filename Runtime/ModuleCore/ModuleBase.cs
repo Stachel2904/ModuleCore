@@ -1,6 +1,5 @@
 ﻿using UnityEngine;
 using System.Collections;
-using DivineSkies.Modules.Logging;
 
 namespace DivineSkies.Modules.Core
 {
