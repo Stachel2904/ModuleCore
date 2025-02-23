@@ -164,8 +164,11 @@ namespace DivineSkies.Modules
         #endregion
 
         #region sceneloading
+        private string _defaultScene = "default";
+        internal void SetDefaultScene(string scene) => _defaultScene = scene;
+        public static void LoadDefaultScene() => LoadScene(_self._defaultScene);
         public static void LoadScene(Enum scene, params SceneLoadData[] loadData) => LoadScene(scene.ToString(), loadData);
-        public static void LoadScene(string scene, params SceneLoadData[] loadData)
+        internal static void LoadScene(string scene, params SceneLoadData[] loadData)
         {
             _self._blendMask.gameObject.SetActive(true);
             _self._blendMask.material.SetFloat("_Radius", 1200);
@@ -190,7 +193,14 @@ namespace DivineSkies.Modules
         private void AfterSceneLoad(Scene scene, LoadSceneMode mode)
         {
             this.PrintLog("--- Starting scene " + scene.name + " ---");
-            var holder = FindObjectOfType<SceneModuleLoader>();
+            SceneModuleLoader holder;
+
+#if UNITY_2023_1_OR_NEWER
+            holder = FindFirstObjectByType<SceneModuleLoader>();
+#else
+            holder = FindObjectOfType<SceneModuleLoader>();
+#endif
+
             if(holder == null) //no scenemodules to load
             {
                 return;
@@ -232,6 +242,6 @@ namespace DivineSkies.Modules
                 _self._blendMask.gameObject.SetActive(false);
             });
         }
-        #endregion
+#endregion
     }
 }
