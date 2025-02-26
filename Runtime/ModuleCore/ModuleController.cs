@@ -13,8 +13,6 @@ namespace DivineSkies.Modules
     public class ModuleController : MonoBehaviour
     {
         public static event Action OnSceneChanged;
-        public float SceneFadeSpeed { get; set; } = 0.3f;
-        public static Transform ConstantUiParent { get; private set; }
 
         private static IEnumerable<ModuleBase> LoadedModules => _self.constantModules.Concat(_self._sceneModules);
 
@@ -27,8 +25,6 @@ namespace DivineSkies.Modules
         private readonly List<ModuleBase> _uninitializedModules = new();
         private readonly List<SceneLoadData> sceneLoadData = new();
 
-        private Image _blendMask;
-
         internal static ModuleController Create(ModuleHolderBase holder)
         {
             if (_self != null)
@@ -36,11 +32,6 @@ namespace DivineSkies.Modules
 
             _self = new GameObject("Modules").AddComponent<ModuleController>();
             DontDestroyOnLoad(_self.gameObject);
-
-            GameObject overlayRendering = Instantiate(Resources.Load<GameObject>("Prefabs/OverlayRendering"));
-            DontDestroyOnLoad(overlayRendering);
-            ConstantUiParent = overlayRendering.transform.GetComponentInChildren<Canvas>().transform;
-            _self._blendMask = ConstantUiParent.Find("BlendMask").GetComponent<Image>();
 
             _holder = holder;
             SceneManager.sceneLoaded += _self.AfterSceneLoad;
@@ -62,7 +53,6 @@ namespace DivineSkies.Modules
         {
             SceneManager.sceneLoaded -= _self.AfterSceneLoad;
             Destroy(_self.gameObject);
-            Destroy(ConstantUiParent.parent.gameObject);
             Destroy(Camera.main.gameObject);
             _self = null;
 
@@ -170,16 +160,7 @@ namespace DivineSkies.Modules
         public static void LoadScene(Enum scene, params SceneLoadData[] loadData) => LoadScene(scene.ToString(), loadData);
         internal static void LoadScene(string scene, params SceneLoadData[] loadData)
         {
-            _self._blendMask.gameObject.SetActive(true);
-            _self._blendMask.material.SetFloat("_Radius", 1200);
-            _self.StartTickRoutine(dt =>
-            {
-                float scaledDt = dt * (1 / 0.3f);
-                float current = _self._blendMask.material.GetFloat("_Radius");
-                _self._blendMask.material.SetFloat("_Radius", current - scaledDt * 1200);
-                return scaledDt;
-            },
-            () => _self.LoadSceneInternal(scene, loadData));
+            _self.LoadSceneInternal(scene, loadData);
         }
 
         private void LoadSceneInternal(string scene, params SceneLoadData[] loadData)
@@ -229,18 +210,6 @@ namespace DivineSkies.Modules
                 module.OnSceneFullyLoaded();
 
             OnSceneChanged?.Invoke();
-
-            _self.StartTickRoutine(dt =>
-            {
-                float scaledDt = dt * (1 / SceneFadeSpeed);
-                float current = _self._blendMask.material.GetFloat("_Radius");
-                _self._blendMask.material.SetFloat("_Radius", current + scaledDt * 1200);
-                return scaledDt;
-            },
-            () =>
-            {
-                _self._blendMask.gameObject.SetActive(false);
-            });
         }
 #endregion
     }
